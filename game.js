@@ -41,6 +41,9 @@ socket.on('move', function (msg) {
         var move = board.move(msg.from+'-'+msg.to);
         game.load(board.fen() + ' ' + color.charAt(0) + ' - - 0 1');
         console.log("moved");
+        if(!kingExists(color)){
+            state.innerHTML = "GAME OVER";
+        }
     }
 });
 socket.on('gameOver', function() {
@@ -67,7 +70,7 @@ var greySquare = function (square) {
 var onDragStart = function (source, piece) {
     // do not pick up pieces if the game is over
     // or if it's not that side's turn
-    if (game.game_over() === true || play ||
+    if (!kingExists(color) === true || play ||
         (game.turn() === 'w' && piece.search(/^b/) !== -1) ||
         (game.turn() === 'b' && piece.search(/^w/) !== -1) ||
         (game.turn() === 'w' && color === 'black') ||
@@ -87,7 +90,7 @@ var onDrop = function (source, target) {
         promotion: 'q' // NOTE: always promote to a queen for example simplicity
     });
     
-    if (!kingExists(color.charAt(0))) {
+    if (!kingExists(color)) {
         state.innerHTML = 'GAME OVER';
         socket.emit('gameOver', roomId)
         game.clear()
@@ -192,7 +195,7 @@ function checkInitialBoardFilled() {
         state.innerHTML = "Join game";
     } else {
         formContainer.classList.add('hidden');
-        state.innerHTML = "Select the arrangment of your pieces below, use only white pieces(black pieces can be ingnored, as they don't do anything) and only in the first two rows. Also, use the same amount of each piece as you would use in a normal game (1 king, 1 queen, 2 rooks, 2 knights, 2 bishops, 8 pawns).";
+        state.innerHTML = "Select the arrangment of your pieces below, use only white pieces (black pieces can be ingnored, as they don't do anything) and only in the first two rows. Also, use the same amount of each piece as you would use in a normal game (1 king, 1 queen, 2 rooks, 2 knights, 2 bishops, 8 pawns).";
     }
 }
 
@@ -210,13 +213,7 @@ function countPieces() {
     return pieceCounts;
 }
 
-function onDropInitialBoard(source, target, piece) {
-    // Check if the target square is occupied
-    const currentPosition = initialBoard.position();
-    if (currentPosition[target]) {
-        return 'snapback';
-    }
-
+function onDragStartInitialBoard(source, piece) {
     // Check if the piece limits are reached
     const pieceCounts = countPieces();
     const maxPieceCounts = {
@@ -229,39 +226,53 @@ function onDropInitialBoard(source, target, piece) {
     };
 
     if (source === 'spare' && pieceCounts[piece] >= maxPieceCounts[piece]) {
+        return false;
+    }
+
+    return true;
+}
+
+function onDropInitialBoard(source, target, piece) {
+    // Check if the target square is occupied
+    const currentPosition = initialBoard.position();
+    if (currentPosition[target]) {
+        //alert('Target square is occupied.');
         return 'snapback';
     }
 
-    if ((piece.startsWith('w') && target[1] >= '3' && target[1] <= '8')||piece.startsWith('b')) {
+    // Check if bishops are on the same color square
+    if (piece[1] === 'B') {
+        const squareColor = (target.charCodeAt(0) - 96 + parseInt(target[1])) % 2;
+        for (const square in currentPosition) {
+            if (currentPosition[square] === piece && (square.charCodeAt(0) - 96 + parseInt(square[1])) % 2 === squareColor) {
+                alert('Two bishops cannot be on the same color square.');
+                return 'snapback';
+            }
+        }
+    }
+
+    if ((piece.startsWith('w') && target[1] >= '3' && target[1] <= '8') || piece.startsWith('b')) {
+        alert('Invalid target square for this piece.');
         return 'snapback';
     }
+
     setTimeout(() => {
         checkInitialBoardFilled();
-      }, 0);
+    }, 0);
 }
+
+
 
 var initialCfg = {
     draggable: true, // Make the initial board draggable
     sparePieces: true,
     dropOffBoard: 'trash',
-    onDrop: onDropInitialBoard
+    onDrop: onDropInitialBoard,
+    onDragStart: onDragStartInitialBoard
 };
 var initialBoard = ChessBoard('initialBoard', initialCfg);
 
-function promotePawns(color) {
-    const position = board.position();
-    const promotionRank = color === 'w' ? '8' : '1';
-    const pawn = color === 'w' ? 'wP' : 'bP';
-    const queen = color === 'w' ? 'wQ' : 'bQ';
 
-    for (const square in position) {
-        if (square[1] === promotionRank && position[square] === pawn) {
-            position[square] = queen;
-        }
-    }
-
-    board.position(position);
-}
 
 function resetToStartingPosition() {
     const startingPositionFEN = '8/8/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
@@ -272,9 +283,17 @@ function resetToStartingPosition() {
 const resetBoardBtn = document.getElementById('resetBoardBtn');
 resetBoardBtn.addEventListener('click', resetToStartingPosition);
 
-function kingExists(color) {
+
+function clearBoard() {
+    initialBoard.clear();
+    checkInitialBoardFilled();
+}
+
+document.getElementById('clearBoardBtn').addEventListener('click', clearBoard);
+
+function kingExists(clr) {
     const position = board.position();
-    const king = color === 'w' ? 'wK' : 'bK';
+    const king = clr.charAt(0) === 'w' ? 'wK' : 'bK';
 
     for (const square in position) {
         if (position[square] === king) {
@@ -283,9 +302,3 @@ function kingExists(color) {
     }
     return false;
 }
-function clearBoard() {
-    initialBoard.clear();
-    checkInitialBoardFilled();
-}
-
-document.getElementById('clearBoardBtn').addEventListener('click', clearBoard);
