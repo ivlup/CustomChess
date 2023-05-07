@@ -70,8 +70,14 @@
     var socket = io();
   </script> -->
   <div class="container">
-      <div id="board" style="width: 500px; margin: auto;"></div>
-      
+      <div id="boardContainer" style="display: flex;">
+        <div id="pieceCountsDisplay">
+          <div id="whitePieceCountsDisplay"></div>
+          <div id="blackPieceCountsDisplay"></div>
+    
+        </div>
+        <div id="board" style="width: 500px; margin: auto;"></div>
+      </div>
       <div style="margin: auto">
       
         <div id="player"></div>

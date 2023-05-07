@@ -31,7 +31,9 @@ socket.on('full', function (msg) {
 socket.on('play', function (msg) {
     if (msg == roomId) {
         play = false;
-        state.innerHTML = "Game in progress";
+        state.innerHTML = "Game in Progress";
+        updateUserPieceCount(color, countPieces(board));
+        socket.emit('pieceCount', {pieceCount: countPieces(board), room: roomId});
     }
     // console.log(msg)
 });
@@ -42,15 +44,32 @@ socket.on('move', function (msg) {
         game.load(board.fen() + ' ' + color.charAt(0) + ' - - 0 1');
         console.log("moved");
         if(!kingExists(color)){
-            state.innerHTML = "GAME OVER";
+            state.innerHTML = "GAME OVER, YOU LOSE";
+            socket.emit('gameOver', roomId);
+        }
+        updateUserPieceCount(color, countPieces(board));
+        socket.emit('pieceCount', {pieceCount: countPieces(board), room: roomId});
+    }
+});
+
+socket.on('pieceCount', function(msg) {
+    if (msg.room == roomId){
+        if (color == "white"){
+            updateUserPieceCount("black", msg.pieceCount);
+        }else{
+            updateUserPieceCount("white", msg.pieceCount);
         }
     }
 });
-socket.on('gameOver', function() {
-    state.innerHTML = 'GAME OVER';
-    game.clear()
-});
 
+socket.on('gameOver', function(msg){
+    if (msg == roomId){
+        state.innerHTML = "GAME OVER, YOU WON!";
+        setTimeout(() => {
+            game.clear();
+        }, 100);
+    }
+});
 
 var removeGreySquares = function () {
     $('#board .square-55d63').css('background', '');
@@ -90,16 +109,12 @@ var onDrop = function (source, target) {
         promotion: 'q' // NOTE: always promote to a queen for example simplicity
     });
     
-    if (!kingExists(color)) {
-        state.innerHTML = 'GAME OVER';
-        socket.emit('gameOver', roomId)
-        game.clear()
-    }
-    
     // illegal move
     if (move === null) return 'snapback';
     else
         socket.emit('move', { from: source, to: target, room: roomId }); // Updated line
+    
+
 };
 
 
@@ -142,6 +157,11 @@ socket.on('player', (msg) => {
         play = false;
         socket.emit('play', msg.roomId);
         state.innerHTML = "Game in Progress"
+        setTimeout(() => {
+            updateUserPieceCount(color, countPieces(board));
+            socket.emit('pieceCount', {pieceCount: countPieces(board), room: roomId});
+        }, 0);
+        
     }
     else
         state.innerHTML = "Waiting for Second player";
@@ -199,8 +219,62 @@ function checkInitialBoardFilled() {
     }
 }
 
-function countPieces() {
-    const pieces = initialBoard.position();
+function updateUserPieceCount(clr, pieceCount){
+    if (clr == 'black'){
+        updateBlackPieceCountsDisplay(pieceCount);
+    }else{
+        updateWhitePieceCountsDisplay(pieceCount);
+    }
+}
+function updateWhitePieceCountsDisplay(pieceCounts) {
+    const whitePieceNames = {
+      'wP': 'White Pawns',
+      'wR': 'White Rooks',
+      'wN': 'White Knights',
+      'wB': 'White Bishops',
+      'wQ': 'White Queens',
+      'wK': 'White Kings',
+    };
+  
+    let displayText = '<table>';
+  
+    for (const piece in whitePieceNames) {
+      if (pieceCounts[piece]) {
+        displayText += `<tr><td>${whitePieceNames[piece]}:</td><td>${pieceCounts[piece]}</td></tr>`;
+      }
+    }
+  
+    displayText += '</table>';
+  
+    document.getElementById('whitePieceCountsDisplay').innerHTML = displayText;
+}
+  
+function updateBlackPieceCountsDisplay(pieceCounts) {
+    const blackPieceNames = {
+      'bP': 'Black Pawns',
+      'bR': 'Black Rooks',
+      'bN': 'Black Knights',
+      'bB': 'Black Bishops',
+      'bQ': 'Black Queens',
+      'bK': 'Black Kings',
+    };
+  
+    let displayText = '<table>';
+  
+    for (const piece in blackPieceNames) {
+      if (pieceCounts[piece]) {
+        displayText += `<tr><td>${blackPieceNames[piece]}:</td><td>${pieceCounts[piece]}</td></tr>`;
+      }
+    }
+  
+    displayText += '</table>';
+  
+    document.getElementById('blackPieceCountsDisplay').innerHTML = displayText;
+}
+  
+  
+function countPieces(brd) {
+    const pieces = brd.position();
     const pieceCounts = {};
 
     for (const square in pieces) {
@@ -215,7 +289,7 @@ function countPieces() {
 
 function onDragStartInitialBoard(source, piece) {
     // Check if the piece limits are reached
-    const pieceCounts = countPieces();
+    const pieceCounts = countPieces(initialBoard);
     const maxPieceCounts = {
         'wP': 8, 'bP': 8, // Pawns
         'wR': 2, 'bR': 2, // Rooks

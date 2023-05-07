@@ -74,6 +74,12 @@ io.on('connection', function (socket) {
         console.log(playerId + ' disconnected');
 
     }); 
+    socket.on('gameOver', function (msg) {
+        socket.broadcast.emit('gameOver', msg);
+    });
+    socket.on('pieceCount', function (msg){
+        socket.broadcast.emit('pieceCount', msg);
+    })
 
     
 });
