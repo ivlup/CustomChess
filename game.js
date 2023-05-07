@@ -8,7 +8,7 @@ var play = true;
 
 var room = document.getElementById("room")
 var roomNumber = document.getElementById("roomNumbers")
-var button = document.getElementById("button")
+var button = document.getElementById("connect-button")
 var state = document.getElementById('state')
 
 var connect = function(){
@@ -228,15 +228,15 @@ function updateUserPieceCount(clr, pieceCount){
 }
 function updateWhitePieceCountsDisplay(pieceCounts) {
     const whitePieceNames = {
-      'wP': 'White Pawns',
-      'wR': 'White Rooks',
-      'wN': 'White Knights',
-      'wB': 'White Bishops',
-      'wQ': 'White Queens',
-      'wK': 'White Kings',
+      'wP': 'Pawns',
+      'wR': 'Rooks',
+      'wN': 'Knights',
+      'wB': 'Bishops',
+      'wQ': 'Queens',
+      'wK': 'Kings',
     };
   
-    let displayText = '<table>';
+    let displayText = '<table> <tr><th>White</th></tr>';
   
     for (const piece in whitePieceNames) {
       if (pieceCounts[piece]) {
@@ -251,15 +251,15 @@ function updateWhitePieceCountsDisplay(pieceCounts) {
   
 function updateBlackPieceCountsDisplay(pieceCounts) {
     const blackPieceNames = {
-      'bP': 'Black Pawns',
-      'bR': 'Black Rooks',
-      'bN': 'Black Knights',
-      'bB': 'Black Bishops',
-      'bQ': 'Black Queens',
-      'bK': 'Black Kings',
+      'bP': 'Pawns',
+      'bR': 'Rooks',
+      'bN': 'Knights',
+      'bB': 'Bishops',
+      'bQ': 'Queens',
+      'bK': 'Kings',
     };
   
-    let displayText = '<table>';
+    let displayText = '<table> <tr><th>Black</th></tr>';
   
     for (const piece in blackPieceNames) {
       if (pieceCounts[piece]) {

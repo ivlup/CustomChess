@@ -1,0 +1,82 @@
+body, html {
+	margin: 0;
+    background-color: #ece1d1;
+}
+
+button {
+    background-color: white;
+    border: 2px solid #0003;
+    border-radius: 100px;
+    padding: 5px 20px;
+    transition: box-shadow ease 0.2s, transform ease 0.2s ;
+}
+
+button:hover{
+    box-shadow: 0px 5px 10px -3px #0005;
+    transform: translateY(-3px);
+}
+
+button:active{
+    box-shadow: 0px 3px 5px -1px #0005;
+    transform: translateY(-1px);
+}
+
+.container {
+    max-width: 600px;
+    margin: 20px auto;
+}
+
+#connect-button {
+    background-color: #27a900;
+    color: white
+}
+
+#roomNumbers {
+	margin: 7px;
+}
+.hidden {
+	display: none;
+}
+
+#buttonContainer button:last-child {
+	margin-right: 0;
+}
+#state,
+#roomNumbers,
+#player {
+	text-align: center;
+}
+
+#pieceCountsDisplay{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px
+}
+
+#pieceCountsDisplay table {
+    border-spacing: 10px;
+}
+
+
+.segment-group {
+    display: flex;
+	justify-content: center;
+    gap: 5px;
+}
+
+.segment-group > * {
+    border-radius: 5px;
+}
+
+.segment-group > *:first-child {
+    border-radius: 20px 5px 5px 20px;
+}
+
+.segment-group > *:last-child {
+    border-radius: 5px 20px 20px 5px;
+}
+
+
+.number {
+	width: 100px; /* Adjust this value as desired */
+}
