@@ -181,6 +181,7 @@ socket.on('player', (msg) => {
         orientation: color,
         draggable: true,
         position: initialFen,
+        pieceTheme: (piece) => `pieceSVG/${piece}.svg`,
         onDragStart: onDragStart,
         onDrop: onDrop,
         onMouseoutSquare: onMouseoutSquare,
@@ -336,11 +337,11 @@ function onDropInitialBoard(source, target, piece) {
 }
 
 
-
 var initialCfg = {
     draggable: true, // Make the initial board draggable
     sparePieces: true,
     dropOffBoard: 'trash',
+    pieceTheme: (piece) => `pieceSVG/${piece}.svg`,
     onDrop: onDropInitialBoard,
     onDragStart: onDragStartInitialBoard
 };
