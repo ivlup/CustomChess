@@ -11,6 +11,9 @@ var roomNumber = document.getElementById("roomNumbers")
 var button = document.getElementById("connect-button")
 var state = document.getElementById('state')
 
+var blackPoints = 0;
+var whitePoints = 0;
+
 var connect = function(){
     roomId = room.value;
     if (roomId !== "" && parseInt(roomId) <= 100) {
@@ -226,6 +229,24 @@ function updateUserPieceCount(clr, pieceCount){
         updateWhitePieceCountsDisplay(pieceCount);
     }
 }
+function updatePointDiff() {
+    const pointDiff = color === 'white' ? whitePoints - blackPoints : blackPoints - whitePoints;
+    const pointDiffDisplay = document.getElementById('pointDiffDisplay');
+  
+    if (pointDiff > 0) {
+      pointDiffDisplay.innerHTML = `+${pointDiff}`;
+      pointDiffDisplay.style.color = 'green';
+    } else if (pointDiff < 0) {
+      pointDiffDisplay.innerHTML = `${pointDiff}`;
+      pointDiffDisplay.style.color = 'red';
+    } else {
+      pointDiffDisplay.innerHTML = `0`;
+      pointDiffDisplay.style.color = 'black';
+    }
+}
+  
+ 
+  
 function updateWhitePieceCountsDisplay(pieceCounts) {
     const whitePieceNames = {
       'wP': 'Pawns',
@@ -236,20 +257,32 @@ function updateWhitePieceCountsDisplay(pieceCounts) {
       'wK': 'Kings',
     };
   
-    let displayText = '<table> <tr><th>White</th></tr>';
+    const whitePieceValues = {
+      'wP': 1,
+      'wR': 5,
+      'wN': 3,
+      'wB': 3,
+      'wQ': 9,
+      'wK': 0, // Kings don't have a point value for the purpose of counting points
+    };
   
+    let displayText = '<table> <tr><th>White</th></tr>';
+    whitePoints = 0;
     for (const piece in whitePieceNames) {
       if (pieceCounts[piece]) {
         displayText += `<tr><td>${whitePieceNames[piece]}:</td><td>${pieceCounts[piece]}</td></tr>`;
+        whitePoints += whitePieceValues[piece] * pieceCounts[piece];
       }
     }
   
     displayText += '</table>';
   
     document.getElementById('whitePieceCountsDisplay').innerHTML = displayText;
-}
+    updatePointDiff()
+  }
   
-function updateBlackPieceCountsDisplay(pieceCounts) {
+  
+  function updateBlackPieceCountsDisplay(pieceCounts) {
     const blackPieceNames = {
       'bP': 'Pawns',
       'bR': 'Rooks',
@@ -259,18 +292,30 @@ function updateBlackPieceCountsDisplay(pieceCounts) {
       'bK': 'Kings',
     };
   
-    let displayText = '<table> <tr><th>Black</th></tr>';
+    const blackPieceValues = {
+      'bP': 1,
+      'bR': 5,
+      'bN': 3,
+      'bB': 3,
+      'bQ': 9,
+      'bK': 0, // Kings don't have a point value for the purpose of counting points
+    };
   
+    let displayText = '<table> <tr><th>Black</th></tr>';
+    blackPoints = 0;
     for (const piece in blackPieceNames) {
       if (pieceCounts[piece]) {
         displayText += `<tr><td>${blackPieceNames[piece]}:</td><td>${pieceCounts[piece]}</td></tr>`;
+        blackPoints += blackPieceValues[piece] * pieceCounts[piece];
       }
     }
   
     displayText += '</table>';
   
     document.getElementById('blackPieceCountsDisplay').innerHTML = displayText;
-}
+    updatePointDiff()
+  }
+  
   
   
 function countPieces(brd) {
