@@ -235,13 +235,13 @@ function updatePointDiff() {
     const pointDiffDisplay = document.getElementById('pointDiffDisplay');
   
     if (pointDiff > 0) {
-      pointDiffDisplay.innerHTML = `+${pointDiff}`;
+      pointDiffDisplay.innerHTML = `Point Differential: +${pointDiff}`;
       pointDiffDisplay.style.color = 'green';
     } else if (pointDiff < 0) {
-      pointDiffDisplay.innerHTML = `${pointDiff}`;
+      pointDiffDisplay.innerHTML = `Point Differential: ${pointDiff}`;
       pointDiffDisplay.style.color = 'red';
     } else {
-      pointDiffDisplay.innerHTML = `0`;
+      pointDiffDisplay.innerHTML = `Point Differential 0`;
       pointDiffDisplay.style.color = 'black';
     }
 }

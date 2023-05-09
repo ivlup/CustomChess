@@ -47,16 +47,35 @@ button:active{
 	text-align: center;
 }
 
-#pieceCountsDisplay{
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2px
+#boardContainer {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
 }
-
-#pieceCountsDisplay table {
-    border-spacing: 10px;
+  
+  
+#whitePieceCountsDisplay {
+    flex: 1;
+    text-align: left;
+    margin-right: 50px; /* Increase the value as needed */
 }
-
+  
+#blackPieceCountsDisplay {
+    flex: 1;
+    text-align: left;
+    margin-left: 50px; /* Increase the value as needed */
+}
+  
+.board {
+    flex: 2;
+    min-width: 500px; /* adjust to the size you want */
+}
+  
+#pointDiffDisplay {
+    text-align: center;
+    margin-top: 1em;
+}
+  
 
 .segment-group {
     display: flex;
