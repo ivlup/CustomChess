@@ -48,27 +48,20 @@ button:active{
 }
 
 #boardContainer {
-    display: flex;
-    justify-content: space-around;
+    display: grid;
+    gap: 10px;
+    grid-template-columns: 100px 1fr 100px;
     align-items: center;
+    margin: 0 -100px;
 }
   
   
-#whitePieceCountsDisplay {
-    flex: 1;
+#whitePieceCountsDisplay, #blackPieceCountsDisplay {
     text-align: left;
-    margin-right: 50px; /* Increase the value as needed */
-}
-  
-#blackPieceCountsDisplay {
-    flex: 1;
-    text-align: left;
-    margin-left: 50px; /* Increase the value as needed */
+    width: 100px;
 }
   
 .board {
-    flex: 2;
-    min-width: 500px; /* adjust to the size you want */
 }
   
 #pointDiffDisplay {
