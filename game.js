@@ -422,3 +422,5 @@ function kingExists(clr) {
     }
     return false;
 }
+
+//test
