@@ -1,7 +1,239 @@
-game = new Chess();
+class ChessValidator {
+    constructor(fen, color) {
+        this.load(fen, color);
+    }
+
+    // Other methods...
+
+    load(fen, color) {
+        this.fen = fen;
+        this.color = color;
+        this.board = this.fenToBoard(fen);
+    }
+
+    
+    clear() {
+        this.fen = null;
+        this.board = Array(8).fill().map(() => Array(8).fill(null));
+    }
+
+    fenToBoard(fen) {
+        let ranks = fen.split(' ')[0].split('/');
+        let board = Array(8).fill().map(() => Array(8).fill(null));
+        for (let rankIndex = 0; rankIndex < 8; rankIndex++) {
+            let fileIndex = 0;
+            for (let char of ranks[rankIndex]) {
+                if (isNaN(parseInt(char))) {
+                    board[rankIndex][fileIndex] = char;
+                    fileIndex++;
+                } else {
+                    fileIndex += parseInt(char);
+                }
+            }
+        }
+        return board;
+    }
+     moves(square) {
+        let piece = this.board[this.notationToIndices(square)[0]][this.notationToIndices(square)[1]];
+        if (piece === null) {
+            return [];
+        }
+
+        let validMoves = [];
+        for (let rank = 0; rank < 8; rank++) {
+            for (let file = 0; file < 8; file++) {
+                let end = String.fromCharCode(file + 'a'.charCodeAt(0)) + (8 - rank).toString();
+                if (this.isMoveValid(square, end)) {
+                    validMoves.push(end);
+                }
+            }
+        }
+        return validMoves;
+    }
+
+    notationToIndices(notation) {
+        let file = notation.charCodeAt(0) - 'a'.charCodeAt(0);
+        let rank = 8 - parseInt(notation[1]);
+        return [rank, file];
+    }
+
+    isPawnMoveValid(start, end) {
+        let [startRank, startFile] = this.notationToIndices(start);
+        let [endRank, endFile] = this.notationToIndices(end);
+        let pawn = this.board[startRank][startFile];
+    
+        // Capture move
+        if (Math.abs(startFile - endFile) === 1) {
+            if ((pawn === pawn.toUpperCase() && startRank - 1 === endRank && this.board[endRank][endFile] !== null) || 
+                (pawn !== pawn.toUpperCase() && startRank + 1 === endRank && this.board[endRank][endFile] !== null)) {
+                return true;
+            }
+        }
+    
+        // Regular move
+        if (startFile !== endFile) {
+            return false;
+        }
+    
+        if (pawn === pawn.toUpperCase()) {
+            if ((startRank === 6 && endRank === 4 && this.board[5][startFile] === null && this.board[4][startFile] === null) ||
+                (startRank - 1 === endRank && this.board[endRank][endFile] === null)) {
+                return true;
+            }
+        } else {
+            if ((startRank === 1 && endRank === 3 && this.board[2][startFile] === null && this.board[3][startFile] === null) ||
+                (startRank + 1 === endRank && this.board[endRank][endFile] === null)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    isRookMoveValid(start, end) {
+        let [startRank, startFile] = this.notationToIndices(start);
+        let [endRank, endFile] = this.notationToIndices(end);
+
+        if (startRank !== endRank && startFile !== endFile) {
+            return false;
+        }
+
+        if (startRank === endRank) {
+            for (let file = Math.min(startFile, endFile) + 1; file < Math.max(startFile, endFile); file++) {
+                if (this.board[startRank][file] !== null) {
+                    return false;
+                }
+            }
+        } else {
+            for (let rank = Math.min(startRank, endRank) + 1; rank < Math.max(startRank, endRank); rank++) {
+                if (this.board[rank][startFile] !== null) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    isKnightMoveValid(start, end) {
+        let [startRank, startFile] = this.notationToIndices(start);
+        let [endRank, endFile] = this.notationToIndices(end);
+
+        return ((Math.abs(startRank - endRank) === 2 && Math.abs(startFile - endFile) === 1) ||
+            (Math.abs(startRank - endRank) === 1 && Math.abs(startFile - endFile) === 2));
+    }
+
+    isBishopMoveValid(start, end) {
+        let [startRank, startFile] = this.notationToIndices(start);
+        let [endRank, endFile] = this.notationToIndices(end);
+
+        if (Math.abs(startRank - endRank) !== Math.abs(startFile - endFile)) {
+            return false;
+        }
+
+        let rankStep = startRank > endRank ? -1 : 1;
+        let fileStep = startFile > endFile ? -1 : 1;
+        let rank = startRank + rankStep, file = startFile + fileStep;
+
+        while (rank !== endRank && file !== endFile) {
+            if (this.board[rank][file] !== null) {
+                return false;
+            }
+            rank += rankStep;
+            file += fileStep;
+        }
+        return true;
+    }
+
+    isQueenMoveValid(start, end) {
+        return this.isRookMoveValid(start, end) || this.isBishopMoveValid(start, end);
+    }
+
+    isKingMoveValid(start, end) {
+        let [startRank, startFile] = this.notationToIndices(start);
+        let [endRank, endFile] = this.notationToIndices(end);
+        return (Math.abs(startRank - endRank) <= 1 && Math.abs(startFile - endFile) <= 1);
+    }
+
+    isMoveValid(start, end) {
+        let [startRank, startFile] = this.notationToIndices(start);
+        let [endRank, endFile] = this.notationToIndices(end);
+        let piece = this.board[startRank][startFile];
+        if (piece === null || (this.color === 'w' && piece === piece.toLowerCase()) || (this.color === 'b' && piece === piece.toUpperCase())) {
+            return false;
+        }
+
+        if (this.board[endRank][endFile] !== null && ((this.color === 'w' && this.board[endRank][endFile] === this.board[endRank][endFile].toUpperCase()) || (this.color === 'b' && this.board[endRank][endFile] === this.board[endRank][endFile].toLowerCase()))) {
+            return false;
+        }
+
+        switch (piece.toLowerCase()) {
+            case 'p':
+                return this.isPawnMoveValid(start, end);
+            case 'r':
+                return this.isRookMoveValid(start, end);
+            case 'n':
+                return this.isKnightMoveValid(start, end);
+            case 'b':
+                return this.isBishopMoveValid(start, end);
+            case 'q':
+                return this.isQueenMoveValid(start, end);
+            case 'k':
+                return this.isKingMoveValid(start, end);
+            default:
+                return false;
+        }
+    }
+    
+    move(start, end) {
+        if (!this.isMoveValid(start, end)) {
+            return false;
+        }
+
+        let [startRank, startFile] = this.notationToIndices(start);
+        let [endRank, endFile] = this.notationToIndices(end);
+        let piece = this.board[startRank][startFile];
+
+        // Update the board
+        this.board[startRank][startFile] = null;
+        this.board[endRank][endFile] = piece;
+
+        // Update the FEN string
+        this.fen = this.boardToFen();
+
+        return true;
+    }
+
+    boardToFen() {
+        let fen = '';
+        for (let rank = 0; rank < 8; rank++) {
+            let emptySquares = 0;
+            for (let file = 0; file < 8; file++) {
+                let piece = this.board[rank][file];
+                if (piece === null) {
+                    emptySquares++;
+                } else {
+                    if (emptySquares > 0) {
+                        fen += emptySquares.toString();
+                        emptySquares = 0;
+                    }
+                    fen += piece;
+                }
+            }
+            if (emptySquares > 0) {
+                fen += emptySquares.toString();
+            }
+            if (rank < 7) {
+                fen += '/';
+            }
+        }
+        return fen;
+    }
+}
+
+let game = new ChessValidator('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', 'w');
 var socket = io();
 
 var color = "white";
+var turn = "white"
 var players;
 var roomId;
 var play = true;
@@ -44,7 +276,8 @@ socket.on('play', function (msg) {
 socket.on('move', function (msg) {
     if (msg.room == roomId) {
         var move = board.move(msg.from+'-'+msg.to);
-        game.load(board.fen() + ' ' + color.charAt(0) + ' - - 0 1');
+        game.load(board.fen(), color.charAt(0));
+        turn = switchMove(turn);
         console.log("moved");
         if(!kingExists(color)){
             state.innerHTML = "GAME OVER, YOU LOSE";
@@ -93,10 +326,10 @@ var onDragStart = function (source, piece) {
     // do not pick up pieces if the game is over
     // or if it's not that side's turn
     if (!kingExists(color) === true || play ||
-        (game.turn() === 'w' && piece.search(/^b/) !== -1) ||
-        (game.turn() === 'b' && piece.search(/^w/) !== -1) ||
-        (game.turn() === 'w' && color === 'black') ||
-        (game.turn() === 'b' && color === 'white') ) {
+        (turn === 'white' && piece.search(/^b/) !== -1) ||
+        (turn === 'black' && piece.search(/^w/) !== -1) ||
+        (turn === 'white' && color === 'black') ||
+        (turn === 'black' && color === 'white') ) {
             return false;
     }
     // console.log({play, players});
@@ -105,16 +338,11 @@ var onDragStart = function (source, piece) {
 var onDrop = function (source, target) {
     removeGreySquares();
 
-    // see if the move is legal
-    var move = game.move({
-        from: source,
-        to: target,
-        promotion: 'q' // NOTE: always promote to a queen for example simplicity
-    });
-    
     // illegal move
-    if (move === null) return 'snapback';
+    if (!(game.isMoveValid(source, target)) || source == target) return 'snapback';
     else
+        game.move(source, target);
+        turn = switchMove(turn);
         socket.emit('move', { from: source, to: target, room: roomId }); // Updated line
     
 
@@ -123,10 +351,8 @@ var onDrop = function (source, target) {
 
 var onMouseoverSquare = function (square, piece) {
     // get list of possible moves for this square
-    var moves = game.moves({
-        square: square,
-        verbose: true
-    });
+    if (!rightColorHighlight(piece)) return;
+    var moves = game.moves(square);
 
     // exit if there are no moves available for this square
     if (moves.length === 0) return;
@@ -136,16 +362,22 @@ var onMouseoverSquare = function (square, piece) {
 
     // highlight the possible squares for this piece
     for (var i = 0; i < moves.length; i++) {
-        greySquare(moves[i].to);
+        greySquare(moves[i]);
     }
 };
+function rightColorHighlight(piece){
+    if (piece.charAt(0) == turn.charAt(0) && piece.charAt(0) == color.charAt(0)){
+        return true;
+    }
+    return false;
+}
 
 var onMouseoutSquare = function (square, piece) {
     removeGreySquares();
 };
 
 var onSnapEnd = function () {
-    board.position(game.fen());
+    board.position(game.boardToFen());
 };
 
 
@@ -194,14 +426,19 @@ socket.on('player', (msg) => {
     initialBoard.destroy();
     board = ChessBoard('board', cfg);
     
-    game.load(initialFen + ' w - - 0 1');
+    game.load(initialFen, 'w');
     
 });
 // console.log(color)
 
 var board;
 
-
+function switchMove(turn){
+    if (turn == "white"){
+        return "black";
+    }
+    return "white";
+}
 function checkInitialBoardFilled() {
     const pieces = initialBoard.position();
     let filledSquares = 0;
