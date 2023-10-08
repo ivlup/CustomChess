@@ -258,9 +258,12 @@ var connect = function(){
     }
     initialBoard.destroy;
 }
-socket.on('full', function (msg) {
-    if(roomId == msg)
-        window.location.assign(window.location.href+ 'full.html');
+socket.on('full', function () {
+    window.location.assign(window.location.href+ 'full.html');
+});
+
+socket.on('disconnected', function () {
+    window.location.assign(window.location.href+ 'disconnected.html');
 });
 
 socket.on('play', function (msg) {

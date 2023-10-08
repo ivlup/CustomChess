@@ -7,14 +7,13 @@ const port = process.env.PORT || 8080
 var app = express();
 const server = http.createServer(app)
 const io = socket(server)
-var players;
 var joined = true;
 
 app.use(express.static(__dirname + "/"));
 
 var games = Array(100);
 for (let i = 0; i < 100; i++) {
-    games[i] = {players: 0 , pid: [0 , 0]};
+    games[i] = {players: []};
 }
 
 
@@ -28,57 +27,61 @@ io.on('connection', function (socket) {
     // console.log(players);
     var color;
     var playerId =  Math.floor((Math.random() * 100) + 1)
-    
+    var room
+    function getOtherPlayer(){
+        return games[room]?.players.filter((x)=>x.id!=playerId)?.[0]
+    }
 
     console.log(playerId + ' connected');
 
     socket.on('joined', function (roomId) {
-        // games[roomId] = {}
-        if (games[roomId].players < 2) {
-            games[roomId].players++;
-            games[roomId].pid[games[roomId].players - 1] = playerId;
+        console.log(games[roomId]);
+        console.log(games[roomId].players.length)
+        if (games[roomId].players.length < 2) {
+            games[roomId].players.push({id: playerId, socket: socket});
+            room = roomId
         }
         else{
             socket.emit('full', roomId)
             return;
         }
         
-        console.log(games[roomId]);
-        players = games[roomId].players
+        let players = games[roomId].players
         
 
-        if (players % 2 == 0) color = 'black';
+        if (players.length % 2 == 0) color = 'black';
         else color = 'white';
 
-        socket.emit('player', { playerId, players, color, roomId })
+        socket.emit('player', { playerId, players:players.length, color, roomId })
         // players--;
 
         
     });
 
     socket.on('move', function (msg) {
-        socket.broadcast.emit('move', msg);
+        getOtherPlayer()?.socket.emit('move', msg)
         // console.log(msg);
     });
 
     socket.on('play', function (msg) {
-        socket.broadcast.emit('play', msg);
+        getOtherPlayer()?.socket.emit('play', msg);
         console.log("ready " + msg);
     });
     
     socket.on('disconnect', function () {
-        for (let i = 0; i < 100; i++) {
-            if (games[i].pid[0] == playerId || games[i].pid[1] == playerId)
-                games[i].players--;
-        }
         console.log(playerId + ' disconnected');
-
+        getOtherPlayer()?.socket.emit('disconnected', {})
+        if(room){
+            games[room].players = []
+            room=undefined
+        }
     }); 
     socket.on('gameOver', function (msg) {
-        socket.broadcast.emit('gameOver', msg);
+        getOtherPlayer()?.socket.emit('gameOver', msg);
     });
     socket.on('pieceCount', function (msg){
-        socket.broadcast.emit('pieceCount', msg);
+        console.log(msg)
+        getOtherPlayer()?.socket.emit('pieceCount', msg);
     })
 
     
