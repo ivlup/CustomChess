@@ -240,8 +240,7 @@ var play = true;
 
 var room = document.getElementById("room")
 var roomNumber = document.getElementById("roomNumbers")
-var connectButton = document.getElementById("connect-button")
-var createButton = document.getElementById("create-game")
+var button = document.getElementById("connect-button")
 var state = document.getElementById('state')
 
 var blackPoints = 0;
@@ -252,31 +251,13 @@ var connect = function(){
     if (roomId !== "" && parseInt(roomId) <= 100) {
         room.remove();
         roomNumber.innerHTML = "Room Number " + roomId;
-        connectButton.remove();
-        createButton.remove();
+        button.remove();
         document.getElementById('buttonContainer').style.display = 'none';
         $('#board').addClass('space-after');
         socket.emit('joined', roomId);
     }
     initialBoard.destroy;
 }
-function generateRandomString(length) {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * characters.length));
-    }
-    return result;
-}
-
-function createGame() {
-    let randomRoomString = generateRandomString(6); // Generating a 6-character random string
-    // Assign the generated string to the input field
-    document.getElementById('room').value = randomRoomString;
-    // Call the connect function
-    connect();
-}
-
 socket.on('full', function () {
     window.location.assign(window.location.href+ 'full.html');
 });

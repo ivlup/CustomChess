@@ -33,16 +33,13 @@
 
 
       <div id="formContainer" class="hidden">
-          <h1 id="roomNumbers">Enter a room number or create a new game</h1>
-          <p id="player"></p>
-          <form class="segment-group">
-            <input type="text" id="room" class="form-control form-control-md" maxlength="6">
-            <button id="connect-button" onclick="connect()">Join Game</button>
-            <button type="button" id="create-game" onclick="createGame()">Create Game</button>
+        <h1 id="roomNumbers">Enter a room number between 0 and 99</h1>
+        <p id="player"></p>
+        <form class="segment-group">
+          <input type="number" id="room" min="0" max="99" class="form-control form-control-md number">
+          <button id="connect-button" onclick="connect()">Connect</button>
         </form>
-        
       </div>
-  
 
       <div id="boardContainer">
         <div id="whitePieceCountsDisplay"></div>
