@@ -11,9 +11,9 @@ var joined = true;
 
 app.use(express.static(__dirname + "/"));
 
-var games = Array(100);
-for (let i = 0; i < 100; i++) {
-    games[i] = {players: []};
+var games = Array(100000);
+for (let i = 0; i < games.length; i++) {
+    games[i] = { players: [] }
 }
 
 
@@ -26,7 +26,7 @@ app.get('/', (req, res) => {
 io.on('connection', function (socket) {
     // console.log(players);
     var color;
-    var playerId =  Math.floor((Math.random() * 100) + 1)
+    var playerId =  Math.floor((Math.random() * 500000) + 1)
     var room
     function getOtherPlayer(){
         return games[room]?.players.filter((x)=>x.id!=playerId)?.[0]
@@ -60,8 +60,6 @@ io.on('connection', function (socket) {
 
         socket.emit('player', { playerId, players:players.length, color, roomId })
         // players--;
-
-        
     });
 
     socket.on('move', function (msg) {

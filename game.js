@@ -238,7 +238,6 @@ var players;
 var roomId;
 var play = true;
 
-var room = document.getElementById("room")
 var roomNumber = document.getElementById("roomNumbers")
 var button = document.getElementById("connect-button")
 var state = document.getElementById('state')
@@ -247,15 +246,12 @@ var blackPoints = 0;
 var whitePoints = 0;
 
 var connect = function(){
-    roomId = room.value;
-    if (roomId !== "" && parseInt(roomId) <= 100) {
-        room.remove();
-        roomNumber.innerHTML = "Room Number " + roomId;
-        button.remove();
-        document.getElementById('buttonContainer').style.display = 'none';
-        $('#board').addClass('space-after');
-        socket.emit('joined', roomId);
-    }
+    roomId = Math.floor((Math.random() * 100000) + 1);
+    roomNumber.innerHTML = "Room Number " + roomId;
+    button.remove();
+    document.getElementById('buttonContainer').style.display = 'none';
+    $('#board').addClass('space-after');
+    socket.emit('joined', roomId);
     initialBoard.destroy;
 }
 
@@ -268,7 +264,6 @@ socket.on('queryGames', function (msg) {
         btn.innerHTML = "Join Game " + x.key;
         btn.onclick = function () {
             roomId = x.key;
-            room.remove();
             roomNumber.innerHTML = "Room Number " + roomId;
             button.remove();
             document.getElementById('buttonContainer').style.display = 'none';
