@@ -32,6 +32,12 @@ io.on('connection', function (socket) {
         return games[room]?.players.filter((x)=>x.id!=playerId)?.[0]
     }
 
+    socket.on('queryGames', function () {
+        let available = games.map((x, i) => {return {game:x, key:i}}).filter((x)=>x.game.players.length==1).map((x)=>{return {key:x.key, player:x.game.players[0].id}})
+        console.log(available)
+        socket.emit('queryGames', available)
+    });
+
     console.log(playerId + ' connected');
 
     socket.on('joined', function (roomId) {

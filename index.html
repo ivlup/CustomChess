@@ -39,6 +39,7 @@
           <input type="number" id="room" min="0" max="99" class="form-control form-control-md number">
           <button id="connect-button" onclick="connect()">Connect</button>
         </form>
+        <div id="games-list"></div>
       </div>
 
       <div id="boardContainer">
@@ -52,7 +53,8 @@
 
       <div id="state">Select the arrangment of your pieces below, use only white pieces (black pieces can be ingnored,
         as they don't do anything) and only in the first two rows. Also, use the same amount of each piece as you would
-        use in a normal game (1 king, 1 queen, 2 rooks, 2 knights, 2 bishops, 8 pawns). </div>
+        use in a normal game (1 king, 1 queen, 2 rooks, 2 knights, 2 bishops, 8 pawns). 
+      </div>
       <div class="board" id="initialBoard"></div>
       <div class="button-container segment-group" id="buttonContainer">
         <button id="resetBoardBtn">Use default starting configuration</button>

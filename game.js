@@ -258,6 +258,29 @@ var connect = function(){
     }
     initialBoard.destroy;
 }
+
+socket.emit('queryGames', {});
+socket.on('queryGames', function (msg) {
+    document.getElementById("games-list").innerHTML = "";
+    console.log(msg);
+    msg.forEach((x) => {
+        var btn = document.createElement("BUTTON");
+        btn.innerHTML = "Join Game " + x.key;
+        btn.onclick = function () {
+            roomId = x.key;
+            room.remove();
+            roomNumber.innerHTML = "Room Number " + roomId;
+            button.remove();
+            document.getElementById('buttonContainer').style.display = 'none';
+            $('#board').addClass('space-after');
+            socket.emit('joined', roomId);
+            document.getElementById("games-list").innerHTML = "";
+        }
+        document.getElementById("games-list").appendChild(btn);
+    })
+})
+
+
 socket.on('full', function () {
     window.location.assign(window.location.href+ 'full.html');
 });
